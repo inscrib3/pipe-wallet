@@ -1,4 +1,14 @@
 {
-  "bitcoin_cli_path": "/home/muffin/btcnode/bitcoin-24.0.1/bin/bitcoin-cli",
-  "start_block": 809607
+  "bitcoin_rpc_url": "https://user.btc.quiknode.pro/123/",
+  "bitcoin_cli_path": "/usr/bin/bitcoin-cli",
+  "start_block": 824875,
+  "legacy_block_end": 810000,
+  "level_db_path": "/home/user/pipe",
+  "mongo_db_url": "mongodb://user:pass@127.0.0.1:27017/",
+  "protocol_name": "xpipe",
+  "max_supply": 21000,
+  "module_name": "xid",
+  "match_ticker": "xid",
+  "match_type": "starts_with",
+  "blacklist": []
 }

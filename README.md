@@ -1,122 +1,40 @@
-# PIPE | DMT Wallet
+# XPIPE Protocol
+The XPIPE Protocol expands what the PIPE protocol can do, opening the door for new things we can create.
 
-The PIPE | DMT Wallet is a NodeJS wallet and indexer for PIPE protocol tokens.  It supports wallet creation, wallet imports as well as sending and receiving tokens.
+We're starting with something called the XID indexer.
 
-The wallet is based on the PIPE | DMT specs found here: https://github.com/BennyTheDev/pipe-specs
+We've made another way to organize and keep track of **$XIDFOF** and **$XID** tokens on the Pipe protocol. It's like a special filing system just for these tokens.
 
-Currently the wallet does not cover the creation of tokens and PIPE | Art. For those please consult available 3rd party services:
+Even though we're still working on some parts, the code is all set and ready for action.
 
-- https://inspip.com/
-- https://ppline.app/
-- https://www.satsx.io/
-- https://www.pipex.space/
+With this code, you can easily organize and manage XID tokens.
 
-NOTE: this is a pre-alpha release of the PIPE wallet and there are no guarantees everything will work perfectly!
+## Token Details:
+XIDFOF: There are 4.4 million of these tokens, all split up into 404 chunks.
+XID: There are 21k of these tokens. You can find more details about them in `config/default.json`.
+
+These tokens will be super useful for our upcoming plans.
+
+## What's New?
+**OP_RETURN XP S**: This lets us do special things related to staking.
+**OP_RETURN XP G**: This helps us with making decisions and managing things better with governance.
+
+## For Other Projects
+Other projects can use this code too. They just need to tweak the `config/default.json` to fit their needs. It'll help them keep things organized and running smoothly. It will also allow you to use the same features we have.
 
 ## Requirements
-
 - Windows, Linux (macOS should work, too)
-- Fully indexed Bitcoin Core 24.0.1+ node (config: rpc=1, server=1, txindex=1)
+- RPC enabled Bitcoin Core (e.g. QuickNode)[https://www.quicknode.com/] or fully indexed Bitcoin Core 24.0.1+ node (config: rpc=1, server=1, txindex=1)
 - Bitcoin Core and bitcoin-cli binaries must run on the same host like the wallet
-- PIPE | DMT Wallet
+- [X Protocol Indexer](https://github.com/PIPELINE-BTC/X-Protocol-Indexer/archive/refs/heads/master.zip)
 - Node >= 18.13.0 & NPM
 
 ## Installation
-
 - Run Bitcoin Core in mainnet, testnet or signet mode
 - Install node dependencies: npm install
-- Adjust config/default.json and adjust "bitcoin_cli_path":
-  - Point to your bitcoin-cli (bitcoin-cli.exe)
+- Adjust config/default.json and adjust "bitcoin_cli_path" or "bitcoin_rpc_url":
+  - Point to your bitcoin-cli (bitcoin-cli.exe) or RPC URL
   - Full path required
   - Quote backslashes if you are using them on Windows
-- For faster indexing, you may optionally download the pipe db (https://trac.network/pipe-db.zip).
-- - Just download, unzip and put the "pipe" folder into your pipe document root (same location as pipe.mjs)
-
-## Updates
-
-If you update straight from the sources, makes sure to run npm install to get the latest package state:
-
-```
-cd /path/to/pipe/
-npm install
-```
-
-## Usage
-
-Enter the document root of the PIPE wallet and proceed with the following commands.
-You might need to wait for the wallet to fully index before it returns results. 
-
-If running on testnet or signet, you need to add the "testnet" argument at the end of each command. This is very important, especially upon initial and continuous indexing.
-
-
-Create a new wallet with name <walletname>
-```
-node pipe.mjs walletcreate <walletname>
-```
-
-Import a wallet using a seed phrase for a new local wallet <walletname>
-```
-node pipe.mjs walletrestore <walletname> "<seedphrase>" <optional: custom derivation path>
-```
-
-Note: after restore, you might not see your balances using the "getbalances".
-In order to load your balances, please use bitcoin-cli's "rescanblockchain" command separately:
-
-```
-/path/to/bitcoin-cli -rpcwallet=<walletname> rescanblockchain 809607
-```
-
-or Windows
-```
-d:/path/to/bitcoin-cli.exe -rpcwallet=<walletname> rescanblockchain 809607
-```
-809607 is the earliest block relevant for tokens. If you own satoshis from before, you'll need to set an earlier block.
-
-Create a new wallet address for wallet <walletname>
-```
-node pipe.mjs newaddress <walletname> <optional: custom derivation path>
-```
-
-Get all sats and token balances for a wallet:
-``` 
-node pipe.mjs getbalances <walletname>
-```
-
-Get token balance for a specific <address> associated with it utxo:
-``` 
-node pipe.mjs getbalance <address> <ticker> <ID>
-```
-
-Send tokens to a receiver from <walletname>:
-``` 
-node pipe.mjs sendtokens <walletname> <address> <ticker> <ID> <amount> <feerate> <optional: custom change address>
-```
-
-Send sats to a receiver from <walletname>:
-``` 
-node pipe.mjs sendsats <walletname> <address> <amount> <feerate> <optional: custom change address>
-```
-
-Get deployment details for a specific token:
-``` 
-node pipe.mjs getdeployment <ticker> <ID>
-```
-
-Get collectible details for a specific collection and item number:
-``` 
-node pipe.mjs getcollectible <collectionaddress> <number>
-```
-
-Get the max. number for a collection:
-``` 
-node pipe.mjs getcollectiblemax <collectionaddress>
-```
-
-## TODO
-
-- Transaction history stream (websockets)
-- Built-in token & art explorer
-- Token and art creation
-- Auto re-indexing upon reorgs
-- Modularization of code & tests
-- Testing, testing, testing
+- (MongoDB)[https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-windows/#procedure] installed
+- (MongoDB Compass)[https://www.mongodb.com/try/download/compass] (optional for viewing data)

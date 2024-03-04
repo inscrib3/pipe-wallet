@@ -1,5 +1,6 @@
 import { Address, Script, Signer, Tap, Tx } from '@cmdcode/tapscript';
 import { Level } from 'level';
+import { MongoClient } from 'mongodb';
 import * as ecc from 'tiny-secp256k1';
 import _bip32 from "bip32";
 const { BIP32Factory } = _bip32;
@@ -20,11 +21,22 @@ import bitcoin from 'bitcoinjs-lib';
 * Many things will change and be transformed into an NPM package with proper sub-packaging and code-style.
  */
 
+const mongo_db_url = config.get('mongo_db_url');
+const level_db_path = config.get('level_db_path');
+const bitcoin_rpc_url = config.get('bitcoin_rpc_url');
+const protocol_name = config.get('protocol_name');
+const module_name = config.get('module_name');
+const match_ticker = config.get('match_ticker');
+const match_type = config.get('match_type');
+const blacklist = config.get('blacklist');
+const max_supply = config.get('max_supply');
 const btc_cli_path = config.get('bitcoin_cli_path');
 let block = config.get('start_block');
-let legacy_block_end = 810000;
+let legacy_block_end = config.get('legacy_block_end');
 
-const db = new Level('pipe', { valueEncoding: 'json'  });
+const mongo = await MongoClient.connect(mongo_db_url);
+const mongo_db = mongo.db(protocol_name).collection(module_name);
+const db = new Level(level_db_path, { valueEncoding: 'json' });
 
 const op_table = {
     p : '50',
@@ -229,6 +241,49 @@ if(process.argv.length !== 0)
 }
 
 /**
+ * Call Bitcoin RPC with a given method and params
+ *
+ * @param method {string}
+ * @param params {(string | number)[]}
+ * @returns {Promise<string>}
+ */
+async function callRpc(method, params = undefined)
+{
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({
+        method,
+        params,
+    });
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+    };
+
+    let result;
+    let sleep = 1000;
+
+    do {
+        try {
+            result = (await (await fetch(bitcoin_rpc_url, requestOptions)).json()).result;
+        } catch (error) {
+            await new Promise((resolve) => setTimeout(resolve, sleep));
+            sleep *= 2;
+        }
+    } while (!result);
+
+    if (typeof result === "string") {
+        return result;
+    } else {
+        return JSON.stringify(result);
+    }
+}   
+
+/**
  * Returns the current max. number for a collectible
  *
  * @param address
@@ -422,7 +477,7 @@ async function index(network = 'main')
 
         if(block > 0)
         {
-            let prev_blockhash = await exe(btc_cli_path + ' getblockhash ' + ( block - 1 ), { maxBuffer: 1024 * 1024 * 10000 });
+            let prev_blockhash = await callRpc('getblockhash', [block - 1]);
             prev_blockhash = prev_blockhash.trim();
 
             try
@@ -436,10 +491,10 @@ async function index(network = 'main')
             } catch(e) {}
         }
 
-        let blockhash = await exe(btc_cli_path + ' getblockhash ' + block, { maxBuffer: 1024 * 1024 * 10000 });
+        let blockhash = await callRpc('getblockhash', [block]);
         blockhash = blockhash.trim();
 
-        let tx = await exe(btc_cli_path + ' getblock "'+blockhash+'" 3', { maxBuffer: 1024 * 1024 * 10000 });
+        let tx = await callRpc('getblock', [blockhash, 3]);
         tx = JSON.parse(tx.trim());
 
         await db.put('mrk', '');
@@ -1364,6 +1419,49 @@ async function indexDeployment(block, blockhash, vout, tx, res, ops, network = '
             await db.put(deployment, JSON.stringify(_deployment));
             await db.put('da_' + to_address + '_' + ticker + '_' + id, deployment);
 
+            if (
+                module_name === "xid" &&
+                blacklist.indexOf(`${ticker}_${id}`) === -1
+            ) {
+                if (
+                    (
+                        match_type === "starts_with" &&
+                        ticker.startsWith(match_ticker)
+                    ) ||
+                    (
+                        match_type === "ends_with" &&
+                        ticker.endsWith(match_ticker)
+                    ) ||
+                    (
+                        match_type === "includes" &&
+                        ticker.includes(match_ticker)
+                    ) ||
+                    (
+                        match_type === "equals" &&
+                        ticker === match_ticker
+                    )
+                ) {
+                    const next_index = (await mongo_db.find({}).toArray()).length;
+                    if (next_index < max_supply) {
+                        await mongo_db.updateOne(
+                            {
+                                "ticker": ticker,
+                                "id": id,
+                            },
+                            {
+                                $set: {
+                                    ..._deployment,
+                                    "t": "d",
+                                    "i": next_index,
+                                }
+                            },
+                            {
+                                upsert: true,
+                            }
+                        );
+                    }
+                }
+            }
             //console.log(await db.get(deployment));
         }
     }
@@ -1965,7 +2063,7 @@ async function getChainBlock()
 {
     try
     {
-        let info = await exe(btc_cli_path + ' getblockchaininfo', { maxBuffer: 1024 * 1024 * 10000 });
+        let info = await callRpc('getblockchaininfo');
         info = JSON.parse(info.trim());
 
         return info.blocks;
