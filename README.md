@@ -10,13 +10,16 @@ Even though we're still working on some parts, the code is all set and ready for
 With this code, you can easily organize and manage XID tokens.
 
 ## Token Details:
+
 XIDFOF: There are 4.4 million of these tokens, all split up into 404 chunks.
+
 XID: There are 21k of these tokens. You can find more details about them in `config/default.json`.
 
 These tokens will be super useful for our upcoming plans.
 
 ## What's New?
 **OP_RETURN XP S**: This lets us do special things related to staking.
+
 **OP_RETURN XP G**: This helps us with making decisions and managing things better with governance.
 
 ## For Other Projects
