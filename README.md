@@ -29,7 +29,7 @@ Other projects can use this code too. They just need to tweak the `config/defaul
 - Windows, Linux (macOS should work, too)
 - RPC enabled Bitcoin Core (e.g. QuickNode)[https://www.quicknode.com/] or fully indexed Bitcoin Core 24.0.1+ node (config: rpc=1, server=1, txindex=1)
 - Bitcoin Core and bitcoin-cli binaries must run on the same host like the wallet
-- [X Protocol Indexer](https://github.com/PIPELINE-BTC/X-Protocol-Indexer/archive/refs/heads/master.zip)
+- [X Protocol Indexer](https://github.com/inscrib3/xpipe-protocol/archive/refs/heads/master.zip)
 - Node >= 18.13.0 & NPM
 
 ## Installation
